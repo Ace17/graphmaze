@@ -1,0 +1,9 @@
+digraph {
+    Isolated;
+    Main -> Loader[label="0.2",weight="0.2"];
+    Main -> Transform[label="0.4",weight="0.4"];
+    Transform -> Loader[label="0.6",weight="0.6"];
+    Transform -> Serializer[label="0.6",weight="0.6"];
+    Serializer -> Serializer[label="0.1",weight="0.1"];
+    Serializer -> Loader[label="0.7",weight="0.7"];
+}
