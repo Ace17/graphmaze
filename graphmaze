@@ -10,8 +10,10 @@ from graph import Graph, Edge, Game
 WIDTH = 1920
 HEIGHT = 1080
 NODE_BG_COLOR = (32, 32, 32)
-NODE_FG_COLOR = (255, 255, 255)
-NODE_FG_HIGHLIGHT_COLOR = (0, 0, 255)
+NODE_FG_COLOR = (224, 224, 255)
+PRIMARY_EDGE_COLOR = (255, 255, 0)
+SECONDARY_EDGE_COLOR = (32, 32, 32)
+NODE_FG_HIGHLIGHT_COLOR = (255, 255, 0)
 BG_COLOR = (0, 0, 0)
 FG_COLOR = (255, 255, 255)
 BORDER_SIZE = 1
@@ -106,27 +108,35 @@ def drawScreen(screen, viewModel):
             continue
         if not edge.dst in visibleNodes:
             continue
-        drawNodeArrow(screen, visibleNodes[edge.src].pos, visibleNodes[edge.dst].pos)
+
+        if edge.src == vnode.name or edge.dst == vnode.name:
+            color = PRIMARY_EDGE_COLOR
+        else:
+            color = SECONDARY_EDGE_COLOR
+        drawNodeArrow(screen, visibleNodes[edge.src].pos, visibleNodes[edge.dst].pos, color)
 
     pygame.display.flip()
 
-def drawNodeArrow(screen, pos1, pos2):
-    if pos1 == pos2:
+def drawNodeArrow(screen, pos1, pos2, color):
+    if (pos1 - pos2).magnitude() < 0.1:
         return
     direction = (pos2 - pos1).normalize()
     drawArrow(screen,
             pos1 + direction * NODE_RADIUS,
-            pos2 - direction * NODE_RADIUS)
+            pos2 - direction * NODE_RADIUS,
+            color)
 
-def drawArrow(screen, pos1, pos2):
+def drawArrow(screen, pos1, pos2, color):
     pos1=transform(pos1)
     pos2=transform(pos2)
-    pygame.draw.line(screen, NODE_FG_COLOR, (pos1.x, pos1.y), (pos2.x, pos2.y), BORDER_SIZE)
+    if (pos1 - pos2).magnitude() < 0.1:
+        return
+    pygame.draw.line(screen, color, (pos1.x, pos1.y), (pos2.x, pos2.y), BORDER_SIZE)
     direction = (pos2 - pos1).normalize()
-    pos3 = pos2 + direction.rotate(+2.5) * 50
-    pygame.draw.line(screen, NODE_FG_COLOR, (pos2.x, pos2.y), (pos3.x, pos3.y), BORDER_SIZE)
-    pos3 = pos2 + direction.rotate(-2.5) * 50
-    pygame.draw.line(screen, NODE_FG_COLOR, (pos2.x, pos2.y), (pos3.x, pos3.y), BORDER_SIZE)
+    pos3 = pos2 + direction.rotate(+2.5) * 10
+    pygame.draw.line(screen, color, (pos2.x, pos2.y), (pos3.x, pos3.y), BORDER_SIZE)
+    pos3 = pos2 + direction.rotate(-2.5) * 10
+    pygame.draw.line(screen, color, (pos2.x, pos2.y), (pos3.x, pos3.y), BORDER_SIZE)
 
 def drawNode(screen, name, center, highlight):
     pos=transform(center)
