@@ -63,6 +63,8 @@ class Game():
         N = len(self.afferent[self.currNode])
         radius = NODE_RADIUS * 5
         for name in self.afferent[self.currNode]:
+            if name == self.currNode:
+                continue
             angleFraction = math.pi / (N + 2)
             angle = - ((1+i+0.5) * angleFraction)
             vnode = VisualNode()
@@ -75,6 +77,8 @@ class Game():
         N = len(self.efferent[self.currNode])
         radius = NODE_RADIUS * 5
         for name in self.efferent[self.currNode]:
+            if name == self.currNode:
+                continue
             angleFraction = math.pi / (N + 2)
             angle = + ((1+i+0.5) * angleFraction)
             vnode = VisualNode()
