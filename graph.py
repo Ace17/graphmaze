@@ -79,7 +79,7 @@ class Game():
         for name in self.efferent[self.currNode]:
             if name == self.currNode:
                 continue
-            angleFraction = math.pi / (N + 2)
+            angleFraction = math.pi / (N + 2) + 0.05
             angle = + ((1+i+0.5) * angleFraction)
             vnode = VisualNode()
             vnode.name = name
