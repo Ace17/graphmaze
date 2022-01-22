@@ -11,13 +11,14 @@ WIDTH = 1920
 HEIGHT = 1080
 NODE_BG_COLOR = (32, 32, 32)
 NODE_FG_COLOR = (255, 255, 255)
+NODE_FG_HIGHLIGHT_COLOR = (0, 0, 255)
 BG_COLOR = (0, 0, 0)
 FG_COLOR = (255, 255, 255)
 BORDER_SIZE = 1
 NODE_RADIUS = 40
 
 g_transform = Vec2(0, 0)
-g_transformZoom = 1
+g_transformZoom = 0.75
 
 def main(args):
     global g_transform
@@ -56,8 +57,6 @@ def main(args):
 
         viewModel = game.tick(userInput)
 
-        g_transform.x += 2 * math.sin(ticks * 0.5)
-        g_transform.y += 2 * math.sin(ticks * 0.1)
         drawScreen(screen, viewModel)
 
         clock.tick(20)
@@ -97,15 +96,17 @@ def readUserInput():
 def drawScreen(screen, viewModel):
     screen.fill(BG_COLOR)
 
-    for name in viewModel.nodePos:
-        drawNode(screen, name, viewModel.nodePos[name])
+    visibleNodes = dict()
+    for vnode in viewModel.nodes:
+        visibleNodes[vnode.name] = vnode
+        drawNode(screen, vnode.name, vnode.pos, vnode.highlight)
 
     for edge in viewModel.edges:
-        if not edge.src in viewModel.nodePos:
+        if not edge.src in visibleNodes:
             continue
-        if not edge.dst in viewModel.nodePos:
+        if not edge.dst in visibleNodes:
             continue
-        drawNodeArrow(screen, viewModel.nodePos[edge.src], viewModel.nodePos[edge.dst])
+        drawNodeArrow(screen, visibleNodes[edge.src].pos, visibleNodes[edge.dst].pos)
 
     pygame.display.flip()
 
@@ -127,16 +128,20 @@ def drawArrow(screen, pos1, pos2):
     pos3 = pos2 + direction.rotate(-2.5) * 50
     pygame.draw.line(screen, NODE_FG_COLOR, (pos2.x, pos2.y), (pos3.x, pos3.y), BORDER_SIZE)
 
-def drawNode(screen, name, center):
+def drawNode(screen, name, center, highlight):
     pos=transform(center)
     pos2=transform(center+Vec2(NODE_RADIUS, 0))
     radius = (pos - pos2).magnitude()
-    basicfont = pygame.font.SysFont(None, 24)
+    basicfont = pygame.font.SysFont(None, 28)
     text = basicfont.render(name, True, NODE_FG_COLOR, NODE_BG_COLOR)
     textrect = text.get_rect()
     textrect.centerx = int(pos.x)
     textrect.centery = int(pos.y)
-    pygame.draw.circle(screen, NODE_BG_COLOR, (int(pos.x), int(pos.y)), int(radius))
+    if highlight:
+        color = NODE_FG_HIGHLIGHT_COLOR
+    else:
+        color = NODE_BG_COLOR
+    pygame.draw.circle(screen, color, (int(pos.x), int(pos.y)), int(radius))
     pygame.draw.circle(screen, NODE_FG_COLOR, (int(pos.x), int(pos.y)), int(radius), BORDER_SIZE)
     screen.blit(text, textrect)
     del text
@@ -152,7 +157,9 @@ def loadGraph(path):
     edges = []
 
     for pydotEdge in pydotGraph.get_edge_list():
-        edge = Edge(pydotEdge.get_source(), pydotEdge.get_destination())
+        src = pydotEdge.get_source().strip('"')
+        dst = pydotEdge.get_destination().strip('"')
+        edge = Edge(src, dst)
         nodeNames[edge.src] = 1
         nodeNames[edge.dst] = 1
         edges.append(edge)

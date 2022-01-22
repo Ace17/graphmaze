@@ -19,8 +19,14 @@ class Edge():
 # View Model
 class ViewModel():
     def __init__(self):
-        self.nodePos = dict()
+        self.nodes = []
         self.edges = []
+
+class VisualNode():
+    def __init__(self):
+        self.pos = Vec2(0, 0)
+        self.highlight = False
+        pass
 
 #------------------------------------------------------------------------------
 # App state
@@ -59,7 +65,10 @@ class Game():
         for name in self.afferent[self.currNode]:
             angleFraction = math.pi / (N + 2)
             angle = - ((1+i+0.5) * angleFraction)
-            viewModel.nodePos[name] = Vec2(math.cos(angle), math.sin(angle)) * radius
+            vnode = VisualNode()
+            vnode.name = name
+            vnode.pos = Vec2(math.cos(angle), math.sin(angle)) * radius
+            viewModel.nodes.append(vnode)
             i += 1
 
         i = 0
@@ -68,10 +77,18 @@ class Game():
         for name in self.efferent[self.currNode]:
             angleFraction = math.pi / (N + 2)
             angle = + ((1+i+0.5) * angleFraction)
-            viewModel.nodePos[name] = Vec2(math.cos(angle), math.sin(angle)) * radius
+            vnode = VisualNode()
+            vnode.name = name
+            vnode.pos = Vec2(math.cos(angle), math.sin(angle)) * radius
+            viewModel.nodes.append(vnode)
             i += 1
 
-        viewModel.nodePos[self.currNode] = Vec2(0, 0)
+        vnode = VisualNode()
+        vnode.name = self.currNode
+        vnode.pos = Vec2(0, 0)
+        vnode.highlight = True
+        
+        viewModel.nodes.append(vnode)
 
         return viewModel
 
