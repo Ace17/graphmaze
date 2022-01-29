@@ -47,7 +47,17 @@ class Game():
             self.afferent[edge.dst].append(edge.src)
             self.efferent[edge.src].append(edge.dst)
 
-        self.k = 0
+        self.currNode = fullGraph.nodes[0]
+
+        # for user node browsing
+        self.nextNode = dict()
+        self.prevNode = dict()
+
+        prev = fullGraph.nodes[-1]
+        for node in fullGraph.nodes:
+            self.nextNode[prev] = node
+            self.prevNode[node] = prev
+            prev = node
 
     def tick(self, userInput):
         if userInput.mouseMove:
@@ -56,11 +66,10 @@ class Game():
         viewModel.edges = self.fullGraph.edges
 
         if userInput.switchToNextNode == True:
-            self.k = (self.k + 1) % len(self.fullGraph.nodes)
-        if userInput.switchToPrevNode == True:
-            self.k = (self.k - 1 + len(self.fullGraph.nodes)) % len(self.fullGraph.nodes)
+            self.currNode = self.nextNode[self.currNode]
 
-        self.currNode = self.fullGraph.nodes[self.k]
+        if userInput.switchToPrevNode == True:
+            self.currNode = self.prevNode[self.currNode]
 
         # layout nodes
         i = 0
@@ -98,9 +107,14 @@ class Game():
         
         viewModel.nodes.append(vnode)
 
+        i = 0
         for node in viewModel.nodes:
             if (node.pos - self.mousePos).magnitude() < NODE_RADIUS:
                 node.focused = True
+                if userInput.click:
+                    self.currNode = node.name
+            i += 1
 
         return viewModel
+
 
