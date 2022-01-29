@@ -152,9 +152,9 @@ def drawArrow(screen, pos1, pos2, color):
         return
     pygame.draw.line(screen, color, (pos1.x, pos1.y), (pos2.x, pos2.y), BORDER_SIZE)
     direction = (pos2 - pos1).normalize()
-    pos3 = pos2 + direction.rotate(+2.5) * 10
+    pos3 = (pos2 + direction.rotate(+2.5) * 10).toInt()
     pygame.draw.line(screen, color, (pos2.x, pos2.y), (pos3.x, pos3.y), BORDER_SIZE)
-    pos3 = pos2 + direction.rotate(-2.5) * 10
+    pos3 = (pos2 + direction.rotate(-2.5) * 10).toInt()
     pygame.draw.line(screen, color, (pos2.x, pos2.y), (pos3.x, pos3.y), BORDER_SIZE)
 
 def drawNode(screen, name, center, highlight):

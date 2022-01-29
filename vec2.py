@@ -40,4 +40,8 @@ class Vec2():
                 self.x * math.cos(angle) - self.y * math.sin(angle),
                 self.x * math.sin(angle) + self.y * math.cos(angle))
 
+    def toInt(self):
+        return Vec2(int(self.x), int(self.y))
+
+
 
