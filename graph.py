@@ -113,6 +113,7 @@ class Game():
                 node.focused = True
                 if userInput.click:
                     self.currNode = node.name
+                break
             i += 1
 
         return viewModel
