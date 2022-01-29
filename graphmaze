@@ -75,8 +75,9 @@ def readUserInput():
     userInput.mouseMove = False
 
     for event in pygame.event.get():
-        if event.type == 2:
-            print("Key down: " + str(event.key))
+        if event.type == 1:
+            pass # Focus
+        elif event.type == 2:
             if event.key == 27:
                 userInput.quit = True
             elif event.key == 275: # Right
