@@ -1,7 +1,7 @@
 import math
 from vec2 import Vec2
 
-NODE_RADIUS = 120
+NODE_RADIUS = 40
 
 #------------------------------------------------------------------------------
 # Representation for the full graph
@@ -26,6 +26,7 @@ class VisualNode():
     def __init__(self):
         self.pos = Vec2(0, 0)
         self.highlight = False
+        self.focused = False
         pass
 
 #------------------------------------------------------------------------------
@@ -34,6 +35,7 @@ class Game():
     def __init__(self, fullGraph):
         self.fullGraph = fullGraph
         self.currNode = fullGraph.nodes[0]
+        self.mousePos = Vec2(0, 0)
 
         self.afferent = dict()
         self.efferent = dict()
@@ -48,12 +50,14 @@ class Game():
         self.k = 0
 
     def tick(self, userInput):
+        if userInput.mouseMove:
+            self.mousePos = userInput.mousePos
         viewModel = ViewModel()
         viewModel.edges = self.fullGraph.edges
 
-        if userInput.click == True:
+        if userInput.switchToNextNode == True:
             self.k = (self.k + 1) % len(self.fullGraph.nodes)
-        if userInput.click2 == True:
+        if userInput.switchToPrevNode == True:
             self.k = (self.k - 1 + len(self.fullGraph.nodes)) % len(self.fullGraph.nodes)
 
         self.currNode = self.fullGraph.nodes[self.k]
@@ -61,12 +65,12 @@ class Game():
         # layout nodes
         i = 0
         N = len(self.afferent[self.currNode])
-        radius = NODE_RADIUS * 5
+        radius = NODE_RADIUS * 15
         for name in self.afferent[self.currNode]:
             if name == self.currNode:
                 continue
             angleFraction = math.pi / (N + 2)
-            angle = - ((1+i+0.5) * angleFraction)
+            angle = - ((1+i+0.5) * angleFraction) - math.pi/2
             vnode = VisualNode()
             vnode.name = name
             vnode.pos = Vec2(math.cos(angle), math.sin(angle)) * radius
@@ -75,12 +79,12 @@ class Game():
 
         i = 0
         N = len(self.efferent[self.currNode])
-        radius = NODE_RADIUS * 5
+        radius = NODE_RADIUS * 15
         for name in self.efferent[self.currNode]:
             if name == self.currNode:
                 continue
-            angleFraction = math.pi / (N + 2) + 0.05
-            angle = + ((1+i+0.5) * angleFraction)
+            angleFraction = math.pi / (N + 2)
+            angle = + ((1+i+0.5) * angleFraction) - math.pi/2 + 0.05
             vnode = VisualNode()
             vnode.name = name
             vnode.pos = Vec2(math.cos(angle), math.sin(angle)) * radius
@@ -94,7 +98,9 @@ class Game():
         
         viewModel.nodes.append(vnode)
 
+        for node in viewModel.nodes:
+            if (node.pos - self.mousePos).magnitude() < NODE_RADIUS:
+                node.focused = True
+
         return viewModel
-
-
 

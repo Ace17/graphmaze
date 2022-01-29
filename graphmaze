@@ -12,6 +12,7 @@ HEIGHT = 1080
 NODE_BG_COLOR = (32, 32, 32)
 NODE_FG_COLOR = (224, 224, 255)
 PRIMARY_EDGE_COLOR = (255, 255, 0)
+FOCUS_COLOR = (255, 0, 0)
 SECONDARY_EDGE_COLOR = (32, 32, 32)
 NODE_FG_HIGHLIGHT_COLOR = (255, 255, 0)
 BG_COLOR = (0, 0, 0)
@@ -66,17 +67,27 @@ def main(args):
 def readUserInput():
     global g_transformZoom
     userInput = Warning()
+    userInput.switchToNextNode = False
+    userInput.switchToPrevNode = False
     userInput.click = False
     userInput.click2 = False
     userInput.quit = False
+    userInput.mouseMove = False
 
     for event in pygame.event.get():
         if event.type == 2:
-            print("Key: " + str(event.key))
+            print("Key down: " + str(event.key))
             if event.key == 27:
                 userInput.quit = True
-        elif event.type == 4:
-            pass # mouse move
+            elif event.key == 275: # Right
+                userInput.switchToNextNode = True
+            elif event.key == 276: # Left
+                userInput.switchToPrevNode = True
+        elif event.type == 3:
+            pass # key up
+        elif event.type == 4: # Mouse motion
+            userInput.mouseMove = True
+            userInput.mousePos = untransform(Vec2(event.pos[0], event.pos[1]))
         elif event.type == 5: # Mouse down
             if event.button == 1:
                 userInput.click = True
@@ -101,7 +112,6 @@ def drawScreen(screen, viewModel):
     visibleNodes = dict()
     for vnode in viewModel.nodes:
         visibleNodes[vnode.name] = vnode
-        drawNode(screen, vnode.name, vnode.pos, vnode.highlight)
 
     for edge in viewModel.edges:
         if not edge.src in visibleNodes:
@@ -114,6 +124,14 @@ def drawScreen(screen, viewModel):
         else:
             color = SECONDARY_EDGE_COLOR
         drawNodeArrow(screen, visibleNodes[edge.src].pos, visibleNodes[edge.dst].pos, color)
+
+    for vnode in viewModel.nodes:
+        if vnode.focused:
+            pos1=transform(vnode.pos)
+            pos2=transform(vnode.pos+Vec2(NODE_RADIUS, 0))
+            radius = (pos1 - pos2).magnitude()
+            pygame.draw.circle(screen, FOCUS_COLOR, (int(pos1.x), int(pos1.y)), int(radius * 1.1))
+        drawNode(screen, vnode.name, vnode.pos, vnode.highlight)
 
     pygame.display.flip()
 
@@ -159,6 +177,9 @@ def drawNode(screen, name, center, highlight):
 def transform(pos):
     v = (pos + g_transform) * g_transformZoom + Vec2(WIDTH/2, HEIGHT/2)
     return Vec2(int(v.x), int(v.y))
+
+def untransform(pos):
+    return (pos -Vec2(WIDTH/2, HEIGHT/2)) * (1.0 / g_transformZoom) - g_transform;
 
 def loadGraph(path):
     import pydotplus
